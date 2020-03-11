@@ -1,47 +1,46 @@
 package br.com.zup.order.service.impl;
 
-import br.com.zup.order.controller.request.CreateOrderRequest;
-import br.com.zup.order.controller.response.OrderResponse;
-import br.com.zup.order.event.Message;
-import br.com.zup.order.event.OrderCreatedEvent;
-import br.com.zup.order.repository.OrderRepository;
-import br.com.zup.order.service.OrderService;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import br.com.zup.order.controller.request.CreateOrderRequest;
+import br.com.zup.order.controller.response.OrderResponse;
+import br.com.zup.order.entity.Order;
+import br.com.zup.order.event.OrderCreatedEvent;
+import br.com.zup.order.event.PurchaseCreatedEvent;
+import br.com.zup.order.repository.OrderRepository;
+import br.com.zup.order.service.OrderService;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
     private OrderRepository orderRepository;
-    private KafkaTemplate<String, Message<OrderCreatedEvent>> template;
+    private KafkaTemplate<String, OrderCreatedEvent> template;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, KafkaTemplate<String, Message<OrderCreatedEvent>> template) {
+    public OrderServiceImpl(OrderRepository orderRepository, KafkaTemplate<String, OrderCreatedEvent> template) {
         this.orderRepository = orderRepository;
         this.template = template;
     }
 
     @Override
     public String save(CreateOrderRequest request) {
-        String orderId = this.orderRepository.save(request.toEntity()).getId();
+    	Order order = this.orderRepository.save(request.toEntity());
+        String orderId = order.getId();
 
         OrderCreatedEvent event = new OrderCreatedEvent(
                 orderId,
                 request.getCustomerId(),
                 request.getAmount(),
-                request.getItems()
-                        .stream()
-                        .map(CreateOrderRequest.OrderItemPart::getId)
-                        .collect(Collectors.toList())
+                order.getTime(),
+                order.getItems()
         );
 
-        Message<OrderCreatedEvent> message = new Message<>(event);
-
-        this.template.send("created-orders", message);
+        this.template.send("created-orders", event);
 
         return orderId;
     }
@@ -53,4 +52,10 @@ public class OrderServiceImpl implements OrderService {
                 .map(OrderResponse::fromEntity)
                 .collect(Collectors.toList());
     }
+
+	@Override
+	public void successPaymentOrders(PurchaseCreatedEvent purchaseCreatedEvent) {
+		Order order = this.orderRepository.getOne(purchaseCreatedEvent.getOrderEvent().getOrderId());
+		this.orderRepository.delete(order);
+	}
 }

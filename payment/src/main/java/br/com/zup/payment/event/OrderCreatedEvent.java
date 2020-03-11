@@ -1,17 +1,17 @@
-package br.com.zup.order.event;
+package br.com.zup.payment.event;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import br.com.zup.order.entity.OrderItem;
+import br.com.zup.payment.entity.OrderItem;
 
 public class OrderCreatedEvent {
 
-    private String orderId;
+	private String orderId;
     private String customerId;
     private BigDecimal amount;
-    private String time;
+    private LocalDateTime time;
     private List<OrderItem> itemIds;
 
     public OrderCreatedEvent() {
@@ -22,7 +22,6 @@ public class OrderCreatedEvent {
         this.customerId = customerId;
         this.amount = amount;
         this.itemIds = itemIds;
-        this.time = time.toString();
     }
 
     public String getOrderId() {
@@ -57,11 +56,11 @@ public class OrderCreatedEvent {
         this.itemIds = itemIds;
     }
 
-	public String getTime() {
+	public LocalDateTime getTime() {
 		return time;
 	}
 
-	public void setTime(String time) {
+	public void setTime(LocalDateTime time) {
 		this.time = time;
 	}
 }

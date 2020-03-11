@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity(name = "orders")
@@ -19,6 +20,8 @@ public class Order {
 
     private BigDecimal amount;
 
+    private LocalDateTime time;
+
     @ManyToMany
     @Cascade(CascadeType.ALL)
     private List<OrderItem> items;
@@ -28,12 +31,13 @@ public class Order {
     public Order() {
     }
 
-    public Order(String id, String customerId, BigDecimal amount, List<OrderItem> items, String status) {
+    public Order(String id, String customerId, BigDecimal amount, List<OrderItem> items, String status, LocalDateTime time) {
         this.id = id;
         this.customerId = customerId;
         this.amount = amount;
         this.items = items;
         this.status = status;
+        this.time = time;
     }
 
     public String getId() {
@@ -75,5 +79,13 @@ public class Order {
     public void setStatus(String status) {
         this.status = status;
     }
+
+	public LocalDateTime getTime() {
+		return time;
+	}
+
+	public void setTime(LocalDateTime time) {
+		this.time = time;
+	}
 
 }

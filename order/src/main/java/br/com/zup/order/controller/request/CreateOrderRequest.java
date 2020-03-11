@@ -1,12 +1,13 @@
 package br.com.zup.order.controller.request;
 
-import br.com.zup.order.entity.Order;
-import br.com.zup.order.entity.OrderItem;
-
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import br.com.zup.order.entity.Order;
+import br.com.zup.order.entity.OrderItem;
 
 public class CreateOrderRequest {
 
@@ -48,7 +49,8 @@ public class CreateOrderRequest {
                 this.items.stream()
                         .map(OrderItemPart::toEntity)
                         .collect(Collectors.toList()),
-                "pending"
+                "pending",
+                LocalDateTime.now()
         );
     }
 

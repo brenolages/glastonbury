@@ -1,5 +1,6 @@
-package br.com.zup.inventory.configuration;
+package br.com.zup.payment.configuration;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,10 +10,10 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -20,16 +21,17 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.springframework.stereotype.Component;
 
-import br.com.zup.inventory.event.PurchaseCreatedEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import br.com.zup.payment.event.PurchaseCreatedEvent;
+import br.com.zup.payment.service.PaymentService;
 
 @Configuration
 public class KafkaConfiguration {
 
     private String bootstrap;
 
-    @Autowired
     public KafkaConfiguration(@Value(value = "${spring.kafka.bootstrap-servers}") String bootstrap) {
         this.bootstrap = bootstrap;
     }
@@ -44,12 +46,12 @@ public class KafkaConfiguration {
 
     @Bean
     public NewTopic message() {
-        return new NewTopic("ticket-booked-orders", 1, (short) 1);
+        return new NewTopic("success-payment-orders", 1, (short) 1);
     }
 
     @Bean
     public NewTopic message2() {
-        return new NewTopic("sold-out-orders", 1, (short) 1);
+        return new NewTopic("failure-payment", 1, (short) 1);
     }
 
     @Bean
